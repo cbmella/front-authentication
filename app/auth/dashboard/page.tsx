@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation'; // Para redirigir al login
 import { ChevronDown, User, LogOut } from 'lucide-react';
+import axios from 'axios'; // Para hacer la petición al backend
 import withAuth from '../../hoc/withAuth'; // El HOC que verifica la autenticación
 
 function Dashboard() {
@@ -14,7 +15,22 @@ function Dashboard() {
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   // Función de logout
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+
+    if (token) {
+      try {
+        // Hacemos la petición al backend para cerrar sesión
+        await axios.post('http://localhost/authentication/public/auth/logout', {}, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } catch (error) {
+        console.error('Error al hacer logout en el backend:', error);
+      }
+    }
+
     // Elimina los tokens de localStorage y sessionStorage
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
