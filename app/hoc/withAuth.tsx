@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
-   return function AuthenticatedComponent(props: P) {
+  return function AuthenticatedComponent(props: P) {
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState(true); // Para manejar el estado de carga
-    const [hasChecked, setHasChecked] = useState(false); // Para evitar ejecutar varias veces la validación
+    const [isLoading, setIsLoading] = useState(true);
+    const [hasChecked, setHasChecked] = useState(false);
 
     useEffect(() => {
       const checkTokenValidity = async () => {
@@ -16,41 +16,49 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
         const sessionToken = sessionStorage.getItem('access_token');
         const token = localToken || sessionToken;
 
+        // Si no hay token, redirigir inmediatamente
         if (!token) {
-          // Redirigir al login si no hay token
           router.replace('/auth/login');
-          setHasChecked(true);
-        } else {
-          try {
-            // Verificar la validez del token
-            const response = await axios.get('http://localhost/authentication/public/auth/validate-token', {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
+          return; // Detener ejecución
+        }
 
-            if (response.status === 200 && response.data.valid) {
-              setIsLoading(false); // Si el token es válido, dejamos de cargar
-            } else {
-              router.replace('/auth/login'); // Redirigir si el token no es válido
-            }
-          } catch (error) {
-            console.error('Token validation failed:', error);
-            router.replace('/auth/login'); // Redirigir en caso de error
-          } finally {
-            setHasChecked(true); // Marcar que la validación se completó
+        try {
+          const response = await axios.get('http://localhost/authentication/public/auth/validate-token', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (response.status === 200 && response.data.valid) {
+            setIsLoading(false); // Token válido, desactivar loading
+          } else {
+            // Token inválido, limpiar almacenamiento y redirigir
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            sessionStorage.removeItem('access_token');
+            sessionStorage.removeItem('refresh_token');
+            router.replace('/auth/login');
           }
+        } catch (error) {
+          console.error('Token validation failed:', error);
+          // En caso de error, limpiar almacenamiento y redirigir
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          sessionStorage.removeItem('access_token');
+          sessionStorage.removeItem('refresh_token');
+          router.replace('/auth/login');
+        } finally {
+          setHasChecked(true); // Marcar que la validación se completó
         }
       };
 
-      // Solo ejecutar la validación una vez
       if (!hasChecked) {
         checkTokenValidity();
       }
     }, [router, hasChecked]);
 
     if (isLoading) {
-      return <p>Loading...</p>; // Mostrar estado de carga mientras se verifica el token
+      return <p>Loading...</p>; // Mostrar mientras se verifica el token
     }
 
     return <WrappedComponent {...props} />;
