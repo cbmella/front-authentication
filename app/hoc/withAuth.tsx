@@ -3,15 +3,18 @@
 import { useEffect, ComponentType, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { UserData } from '../types/UserData';
+
 
 const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
   return function AuthenticatedComponent(props: P) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
+    const [userData, setUserData] = useState<UserData | null>(null);
     const [hasChecked, setHasChecked] = useState(false);
 
     useEffect(() => {
-      const checkTokenValidity = async () => {
+      const checkTokenValidity = async (): Promise<void> => {
         const localToken = localStorage.getItem('access_token');
         const sessionToken = sessionStorage.getItem('access_token');
         const token = localToken || sessionToken;
@@ -31,6 +34,7 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
 
           if (response.status === 200 && response.data.valid) {
             setIsLoading(false); // Token válido, desactivar loading
+            setUserData(response.data.user);
           } else {
             // Token inválido, limpiar almacenamiento y redirigir
             localStorage.removeItem('access_token');
@@ -61,7 +65,7 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
       return <p>Loading...</p>; // Mostrar mientras se verifica el token
     }
 
-    return <WrappedComponent {...props} />;
+    return <WrappedComponent {...props} user={userData} />; // Pasar los datos del usuario como prop
   };
 };
 

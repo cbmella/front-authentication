@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import withAuth from '../../hoc/withAuth'
 import { ChevronDown, User, LogOut, Home, Users, FolderOpen, Package, ShoppingCart, BarChart } from 'lucide-react'
+import { UserData } from '../../types/UserData';
 
 const sidebarItems = [
   { name: 'Panel de control', icon: Home },
@@ -48,7 +49,12 @@ const recentlyAddedProducts = [
   { name: 'Tornillo Phillips2 70mm', category: 'Tornillos', price: '$4' },
 ]
 
-function Dashboard() {
+interface DashboardProps {
+  user: UserData;
+  // otras props si las hay
+}
+
+function Dashboard({ user }: DashboardProps) {
   const [activePage, setActivePage] = useState('Panel de control')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const router = useRouter()
@@ -112,13 +118,14 @@ function Dashboard() {
               <span className="text-xl font-semibold">Dashboard</span>
             </div>
             <div className="relative">
-              <button
-                onClick={toggleDropdown}
-                className="flex items-center space-x-2 focus:outline-none"
-              >
-                <span>CESAR Bugueno</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
+            <button
+              onClick={toggleDropdown}
+              className="flex items-center space-x-2 focus:outline-none"
+            >
+              <span>{user.name}</span>
+              <ChevronDown className="w-4 h-4" />
+            </button>
+
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-gray-700 rounded-md shadow-lg py-1">
                   <a
