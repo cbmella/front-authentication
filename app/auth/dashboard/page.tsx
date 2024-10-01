@@ -7,7 +7,13 @@ import { ChevronDown, User, LogOut } from 'lucide-react';
 import axios from 'axios'; // Para hacer la petición al backend
 import withAuth from '../../hoc/withAuth'; // El HOC que verifica la autenticación
 
-function Dashboard() {
+interface DashboardProps {
+  user: {
+    name: string; // Asumimos que el nombre del usuario está en esta propiedad
+  };
+}
+
+function Dashboard({ user }: DashboardProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const router = useRouter(); // Para manejar la redirección
 
@@ -54,7 +60,7 @@ function Dashboard() {
               onClick={toggleDropdown}
               className="flex items-center space-x-2 focus:outline-none"
             >
-              <span>CESAR Bugueno</span>
+              <span>{user.name}</span> {/* Aquí se muestra el nombre del usuario */}
               <ChevronDown className="w-4 h-4" />
             </button>
             {isDropdownOpen && (

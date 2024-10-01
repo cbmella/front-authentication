@@ -8,6 +8,7 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
   return function AuthenticatedComponent(props: P) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
+    const [userData, setUserData] = useState<any>(null); // Estado para almacenar los datos del usuario
     const [hasChecked, setHasChecked] = useState(false);
 
     useEffect(() => {
@@ -31,6 +32,7 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
 
           if (response.status === 200 && response.data.valid) {
             setIsLoading(false); // Token válido, desactivar loading
+            setUserData(response.data.user);
           } else {
             // Token inválido, limpiar almacenamiento y redirigir
             localStorage.removeItem('access_token');
@@ -61,7 +63,7 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
       return <p>Loading...</p>; // Mostrar mientras se verifica el token
     }
 
-    return <WrappedComponent {...props} />;
+    return <WrappedComponent {...props} user={userData} />; // Pasar los datos del usuario como prop
   };
 };
 
