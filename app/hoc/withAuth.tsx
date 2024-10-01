@@ -23,7 +23,7 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
         }
 
         try {
-          const response = await axios.get('http://localhost/authentication/public/auth/validate-token', {
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/validate-token`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },

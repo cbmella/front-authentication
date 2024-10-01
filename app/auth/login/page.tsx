@@ -20,7 +20,7 @@ function LoginComponent() {
 
     try {
       setIsSubmitting(true); // Comienza el estado de carga
-      const response = await axios.post('http://localhost/authentication/public/auth/login', {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         email,
         password,
       });

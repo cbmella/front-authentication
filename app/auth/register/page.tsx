@@ -37,7 +37,7 @@ function Register() {
 
     try {
       setIsSubmitting(true); // Comienza el estado de carga
-      const response = await axios.post('http://localhost/authentication/public/auth/register', {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
         name: formData.name,
         email: formData.email,
         password: formData.password,
